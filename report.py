@@ -1,112 +1,120 @@
-from qgis.PyQt.QtWidgets import QAction, QFileDialog, QTableWidgetItem, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QTextBrowser, QTableWidget, QPushButton, QWidget, QApplication, QSplitter
-from qgis.PyQt.QtCore import Qt
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QTextBrowser, QPushButton
 from qgis.utils import iface
-import pandas as pd
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
-class TaxInfoPlugin(QDialog):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Tax Info Plugin")
-        self.resize(900, 700)
+class HtmlReportDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Informasi Data Bidang Tanah")
+        self.setMinimumSize(700, 900)
 
-        # Button Import CSV
-        self.btnImport = QPushButton("Import CSV")
+        html_content = """
+        <html>
+        <head>
+        <style>
+            body { font-family: Arial, sans-serif; padding: 15px; }
+            h2 { color: #0066cc; margin-bottom: 5px; }
+            h3 { margin-top: 0; }
+            p { margin: 2px 0; font-size: 14px; color: #333; }
+            table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
+            th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
+            th { background-color: #f0f0f0; }
+            .scroll-table {
+                max-height: 120px;
+                overflow-y: auto;
+                border: 1px solid #ccc;
+                margin-top: 10px;
+            }
+            .diagram-section {
+                margin-top: 25px;
+            }
+            .diagram-title {
+                font-weight: bold;
+                margin-top: 15px;
+                margin-bottom: 5px;
+                font-size: 15px;
+            }
+            .pie-chart {
+                width: 280px;
+                height: 280px;
+                margin-bottom: 20px;
+            }
+        </style>
+        </head>
+        <body>
+            <h2>Informasi Data</h2>
+            <h3>Bidang Tanah</h3>
+            <p><b>Luas Area</b></p>
+            <p>Total Bangunan</p>
+            <p>Total Bidang Tanah</p>
+            <p>Total Pajak Bangunan</p>
+            <p>Total Pajak Bumi</p>
+            <p>Total PBB</p>
+            <p>Rata-rata Pajak Bangunan</p>
+            <p>Rata-rata Pajak Bumi</p>
+            <p>Rata-rata PBB</p>
 
-        # Text Summary
-        self.textSummary = QTextBrowser()
-        self.textSummary.setMinimumHeight(120)
+            <div class="scroll-table">
+                <table>
+                    <thead>
+                        <tr><th>Desa</th><th>Pajak Bangunan</th><th>Pajak Bumi</th><th>PBB</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Kelurahan 1</td><td></td><td></td><td></td></tr>
+                        <tr><td>Kelurahan 2</td><td></td><td></td><td></td></tr>
+                        <tr><td>Kelurahan 3</td><td></td><td></td><td></td></tr>
+                        <tr><td>Kelurahan 4</td><td></td><td></td><td></td></tr>
+                    </tbody>
+                </table>
+            </div>
 
-        # Table Widget
-        self.tableWidget = QTableWidget()
-        self.tableWidget.setMinimumHeight(200)
+            <div class="diagram-section">
+                <div class="diagram-title">Diagram Pajak</div>
 
-        # Layout untuk chart
-        self.chartLayout = QHBoxLayout()
+                <div>
+                    <div class="diagram-title">Pajak Bangunan</div>
+                    <!-- Placeholder pie chart (replace with actual images or SVG) -->
+                    <svg class="pie-chart" viewBox="0 0 32 32" width="280" height="280">
+                        <circle r="16" cx="16" cy="16" fill="#f0f0f0"/>
+                        <circle r="16" cx="16" cy="16" fill="#4caf50" stroke="#fff" stroke-width="0.5" stroke-dasharray="50 50" transform="rotate(-90 16 16)" />
+                        <circle r="16" cx="16" cy="16" fill="#2196f3" stroke="#fff" stroke-width="0.5" stroke-dasharray="25 75" transform="rotate(-40 16 16)" />
+                    </svg>
+                </div>
 
-        # Layout utama
-        mainLayout = QVBoxLayout()
-        mainLayout.addWidget(self.btnImport)
-        mainLayout.addWidget(QLabel("Informasi Data"))
-        mainLayout.addWidget(self.textSummary)
-        mainLayout.addWidget(QLabel("Tabel Data"))
-        mainLayout.addWidget(self.tableWidget)
-        mainLayout.addWidget(QLabel("Diagram Pajak"))
-        mainLayout.addLayout(self.chartLayout)
-        self.setLayout(mainLayout)
+                <div>
+                    <div class="diagram-title">Pajak Bumi</div>
+                    <svg class="pie-chart" viewBox="0 0 32 32" width="280" height="280">
+                        <circle r="16" cx="16" cy="16" fill="#f0f0f0"/>
+                        <circle r="16" cx="16" cy="16" fill="#ff9800" stroke="#fff" stroke-width="0.5" stroke-dasharray="60 40" transform="rotate(-90 16 16)" />
+                        <circle r="16" cx="16" cy="16" fill="#9c27b0" stroke="#fff" stroke-width="0.5" stroke-dasharray="30 70" transform="rotate(-50 16 16)" />
+                    </svg>
+                </div>
 
-        # Connect tombol import
-        self.btnImport.clicked.connect(self.load_csv)
+                <div>
+                    <div class="diagram-title">PBB</div>
+                    <svg class="pie-chart" viewBox="0 0 32 32" width="280" height="280">
+                        <circle r="16" cx="16" cy="16" fill="#f0f0f0"/>
+                        <circle r="16" cx="16" cy="16" fill="#e91e63" stroke="#fff" stroke-width="0.5" stroke-dasharray="70 30" transform="rotate(-90 16 16)" />
+                        <circle r="16" cx="16" cy="16" fill="#00bcd4" stroke="#fff" stroke-width="0.5" stroke-dasharray="20 80" transform="rotate(-60 16 16)" />
+                    </svg>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
 
-    def load_csv(self):
-        path, _ = QFileDialog.getOpenFileName(self, "Pilih File CSV", "", "CSV Files (*.csv)")
-        if not path:
-            return
-        try:
-            self.df = pd.read_csv(path)
-        except Exception as e:
-            iface.messageBar().pushCritical("Tax Info Plugin", f"Gagal baca CSV: {e}")
-            return
+        layout = QVBoxLayout()
 
-        self.show_summary()
-        self.show_table()
-        self.show_charts()
+        self.browser = QTextBrowser()
+        self.browser.setHtml(html_content)
 
-    def show_summary(self):
-        luas_area = self.df.get('Luas Area', pd.Series([0])).sum()
-        total_bangunan = self.df.get('Pajak Bangunan', pd.Series([0])).sum()
-        total_bumi = self.df.get('Pajak Bumi', pd.Series([0])).sum()
-        total_pbb = self.df.get('PBB', pd.Series([0])).sum()
+        self.close_button = QPushButton("Close")
+        self.close_button.clicked.connect(self.accept)
 
-        text = (f"<b>Bidang Tanah</b><br>"
-                f"Luas Area: {luas_area}<br>"
-                f"Total Pajak Bangunan: {total_bangunan}<br>"
-                f"Total Pajak Bumi: {total_bumi}<br>"
-                f"Total PBB: {total_pbb}<br>")
-        self.textSummary.setHtml(text)
+        layout.addWidget(self.browser)
+        layout.addWidget(self.close_button)
 
-    def show_table(self):
-        df = self.df.fillna('')
-        self.tableWidget.clear()
-        self.tableWidget.setRowCount(len(df))
-        self.tableWidget.setColumnCount(len(df.columns))
-        self.tableWidget.setHorizontalHeaderLabels(df.columns.tolist())
+        self.setLayout(layout)
 
-        for i, row in df.iterrows():
-            for j, col in enumerate(df.columns):
-                self.tableWidget.setItem(i, j, QTableWidgetItem(str(row[col])))
-        self.tableWidget.resizeColumnsToContents()
-
-    def show_charts(self):
-        # Bersihkan layout chart dulu
-        while self.chartLayout.count():
-            item = self.chartLayout.takeAt(0)
-            widget = item.widget()
-            if widget:
-                widget.deleteLater()
-
-        # Buat 3 pie chart berdasarkan kolom pajak
-        self.create_pie_chart('Pajak Bangunan')
-        self.create_pie_chart('Pajak Bumi')
-        self.create_pie_chart('PBB')
-
-    def create_pie_chart(self, column):
-        if column not in self.df.columns:
-            return
-        data = self.df.groupby('Blok')[column].sum()
-        if data.empty:
-            return
-
-        fig, ax = plt.subplots(figsize=(3, 3))
-        ax.pie(data, labels=data.index, autopct='%1.1f%%', startangle=90)
-        ax.set_title(column)
-        ax.axis('equal')
-
-        canvas = FigureCanvas(fig)
-        self.chartLayout.addWidget(canvas)
-        canvas.draw()
-
-# Untuk jalankan langsung di QGIS Python Console:
-plugin = TaxInfoPlugin()
-plugin.show()
+# Tampilkan dialog di QGIS
+dialog = HtmlReportDialog(parent=iface.mainWindow())
+dialog.exec_()
