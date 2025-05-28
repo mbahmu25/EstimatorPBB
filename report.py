@@ -1,27 +1,26 @@
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QPushButton
-from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtWidgets import (
+    QDialog, QVBoxLayout, QLabel, QPushButton, QTextBrowser,
+    QWidget, QScrollArea
+)
 from qgis.utils import iface
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import Qt
+import matplotlib.pyplot as plt
+from io import BytesIO
+# === HTML content (customize this part as needed) ===
 
-class HtmlReportWebDialog(QDialog):
+
+# === Dialog class ===
+class HtmlReportDialog(QDialog):
     def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle("Informasi Data Bidang Tanah")
-        self.resize(360, 640)  # ukuran sesuai yang kamu mau
-
-        layout = QVBoxLayout()
-
-        self.webview = QWebEngineView()
-        layout.addWidget(self.webview)
-
-        self.close_button = QPushButton("Close")
-        self.close_button.clicked.connect(self.accept)
-        layout.addWidget(self.close_button)
-
-        self.setLayout(layout)
-
+        
+        isian ="<h1>{a}</h1>"
+        a = 100*123125
+        isian += f"<h1>{a}</h1>"
         html_content = """
         <html>
         <head>
+        
         <style>
             body { font-family: 'Segoe UI', sans-serif; padding: 30px; color: #ACABAB; }
             h2 { color: #0066cc; margin-bottom: 1px; }
@@ -50,56 +49,64 @@ class HtmlReportWebDialog(QDialog):
                 height: 280px;
                 margin-bottom: 20px;
             }
+            td.text {
+                padding: 4px; 
+                text-align: left; 
+                font-weight: normal; 
+                color:#0f0f0f;
+                font-size: 8pt;
+            }
         </style>
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
         </head>
         <body>
             <h2>Informasi Data</h2>
             <h3>Bidang Tanah</h3>
             <table border-collapse: collapse;border: 0px;>
               <tr>
-                <td style="padding: 4px; text-align: left; font-weight: normal; color:#ACABAB;">Luas Area</td>
-                <td style="padding: 4px; text-align: center; color:#ACABAB;">:</td>
-                <td style="padding: 4px; text-align: left; color:#ACABAB;">12345 m<sup>2</sup></td>
+                <td class="text">Luas Area</td>
+                <td class="text">:</td>
+                <td class="text">12345 m<sup>2</sup></td>
               </tr>
               <tr>
-                <td style="padding: 4px; text-align: left; font-weight: normal; color:#ACABAB;">Total Bangunan</td>
-                <td style="padding: 4px; text-align: center; color:#ACABAB;">:</td>
-                <td style="padding: 4px; text-align: left; color:#ACABAB;">15</td>
+                <td class="text">Total Bangunan</td>
+                <td class="text">:</td>
+                <td class="text">15</td>
               </tr>
               <tr>
-                <td style="padding: 4px; text-align: left; font-weight: normal; color:#ACABAB;">Total Bidang Tanah</td>
-                <td style="padding: 4px; text-align: center; color:#ACABAB;">:</td>
-                <td style="padding: 4px; text-align: left; color:#ACABAB;">30</td>
+                <td class="text">Total Bidang Tanah</td>
+                <td class="text">:</td>
+                <td class="text">30</td>
               </tr>
               <tr>
-                <td style="padding: 4px; text-align: left; font-weight: normal; color:#ACABAB;">Total Pajak Bangunan</td>
-                <td style="padding: 4px; text-align: center; color:#ACABAB;">:</td>
-                <td style="padding: 4px; text-align: left; color:#ACABAB;">Rp 12.345.678</td>
+                <td class="text">Total Pajak Bangunan</td>
+                <td class="text">:</td>
+                <td class="text">Rp 12.345.678</td>
               </tr>
               <tr>
-                <td style="padding: 4px; text-align: left; font-weight: normal; color:#ACABAB;">Total Pajak Bumi</td>
-                <td style="padding: 4px; text-align: center; color:#ACABAB;">:</td>
-                <td style="padding: 4px; text-align: left; color:#ACABAB;">Rp 9.876.543</td>
+                <td class="text">Total Pajak Bumi</td>
+                <td class="text">:</td>
+                <td class="text">Rp 9.876.543</td>
               </tr>
               <tr>
-                <td style="padding: 4px; text-align: left; font-weight: normal; color:#ACABAB;">Total PBB</td>
-                <td style="padding: 4px; text-align: center; color:#ACABAB;">:</td>
-                <td style="padding: 4px; text-align: left; color:#ACABAB;">Rp 22.222.222</td>
+                <td class="text">Total PBB</td>
+                <td class="text">:</td>
+                <td class="text">Rp 22.222.222</td>
               </tr>
               <tr>
-                <td style="padding: 4px; text-align: left; font-weight: normal; color:#ACABAB;">Rata-rata Pajak Bangunan</td>
-                <td style="padding: 4px; text-align: center; color:#ACABAB;">:</td>
-                <td style="padding: 4px; text-align: left; color:#ACABAB;">Rp 1.234.567</td>
+                <td class="text">Rata-rata Pajak Bangunan</td>
+                <td class="text">:</td>
+                <td class="text">Rp 1.234.567</td>
               </tr>
               <tr>
-                <td style="padding: 4px; text-align: left; font-weight: normal; color:#ACABAB;">Rata-rata Pajak Bumi</td>
-                <td style="padding: 4px; text-align: center; color:#ACABAB;">:</td>
-                <td style="padding: 4px; text-align: left; color:#ACABAB;">Rp 987.654</td>
+                <td class="text">Rata-rata Pajak Bumi</td>
+                <td class="text">:</td>
+                <td class="text">Rp 987.654</td>
               </tr>
               <tr>
-                <td style="padding: 4px; text-align: left; font-weight: normal; color:#ACABAB;">Rata-rata PBB</td>
-                <td style="padding: 4px; text-align: center; color:#ACABAB;">:</td>
-                <td style="padding: 4px; text-align: left; color:#ACABAB;">Rp 1.111.111</td>
+                <td class="text">Rata-rata PBB</td>
+                <td class="text">:</td>
+                <td class="text">Rp 1.111.111</td>
               </tr>
             </table>
 
@@ -144,43 +151,69 @@ class HtmlReportWebDialog(QDialog):
                     </tbody>
                 </table>
             </div>
-
-            <div class="diagram-section">
-                <h3>Diagram Pajak</h3>
-
-                <div>
-                    <div class="diagram-title">Pajak Bangunan</div>
-                    <svg class="pie-chart" viewBox="0 0 32 32" >
-                        <circle r="16" cx="16" cy="16" fill="#f0f0f0"/>
-                        <circle r="16" cx="16" cy="16" fill="#4caf50" stroke="#fff" stroke-width="0.5" stroke-dasharray="50 50" transform="rotate(-90 16 16)" />
-                        <circle r="16" cx="16" cy="16" fill="#2196f3" stroke="#fff" stroke-width="0.5" stroke-dasharray="25 75" transform="rotate(-40 16 16)" />
-                    </svg>
-                </div>
-
-                <div>
-                    <div class="diagram-title">Pajak Bumi</div>
-                    <svg class="pie-chart" viewBox="0 0 32 32" >
-                        <circle r="16" cx="16" cy="16" fill="#f0f0f0"/>
-                        <circle r="16" cx="16" cy="16" fill="#ff9800" stroke="#fff" stroke-width="0.5" stroke-dasharray="60 40" transform="rotate(-90 16 16)" />
-                        <circle r="16" cx="16" cy="16" fill="#9c27b0" stroke="#fff" stroke-width="0.5" stroke-dasharray="30 70" transform="rotate(-50 16 16)" />
-                    </svg>
-                </div>
-
-                <div>
-                    <div class="diagram-title">PBB</div>
-                    <svg class="pie-chart" viewBox="0 0 32 32" >
-                        <circle r="16" cx="16" cy="16" fill="#f0f0f0"/>
-                        <circle r="16" cx="16" cy="16" fill="#e91e63" stroke="#fff" stroke-width="0.5" stroke-dasharray="70 30" transform="rotate(-90 16 16)" />
-                        <circle r="16" cx="16" cy="16" fill="#00bcd4" stroke="#fff" stroke-width="0.5" stroke-dasharray="20 80" transform="rotate(-60 16 16)" />
-                    </svg>
-                </div>
-            </div>
         </body>
         </html>
         """
+        super().__init__(parent)
+        self.setWindowTitle("Report PBB Daerah")
+        self.setMinimumSize(600, 500)
 
-        self.webview.setHtml(html_content)
+        # === Scroll Area utama ===
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
 
-# Tampilkan dialog di QGIS
-dialog = HtmlReportWebDialog(parent=iface.mainWindow())
+        # === Widget kontainer yang bisa discroll ===
+        scroll_content = QWidget()
+        scroll_layout = QVBoxLayout(scroll_content)
+
+        
+        
+        self.browser = QTextBrowser()
+        self.browser.setHtml(html_content)
+        self.browser.setMinimumHeight(500)
+
+        scroll_layout.addWidget(self.browser)
+
+        # === Masukkan scroll_content ke scroll_area ===
+        scroll_area.setWidget(scroll_content)
+
+        # === Layout utama dialog ===
+        main_layout = QVBoxLayout(self)
+        main_layout.addWidget(scroll_area)
+
+        # Tombol Close di bawah (tetap terlihat)
+        self.close_button = QPushButton("Close")
+        self.close_button.clicked.connect(self.accept)
+        main_layout.addWidget(self.close_button)
+        
+        # === Chart ===
+        self.chart_label = QLabel()
+        self.chart_label.setAlignment(Qt.AlignCenter)
+        scroll_layout.addWidget(self.chart_label)
+
+        # Render chart
+        self.render_pie_chart()
+        
+    def render_pie_chart(self):
+        # Contoh data pajak
+        labels = ['Pajak Bangunan', 'Pajak Bumi', 'Lainnya']
+        sizes = [45, 30, 25]
+        colors = ['#4caf50', '#ff9800', '#9c27b0']
+
+        fig, ax = plt.subplots(figsize=(3, 3), dpi=100)
+        ax.pie(sizes, labels=labels, autopct='%1.1f%%', colors=colors)
+        ax.set_title("Diagram Pajak (PBB)")
+
+        buf = BytesIO()
+        plt.tight_layout()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+
+        pixmap = QPixmap()
+        pixmap.loadFromData(buf.read())
+        self.chart_label.setPixmap(pixmap)
+
+        plt.close(fig)
+# === Show dialog in QGIS ===
+dialog = HtmlReportDialog(parent=iface.mainWindow())
 dialog.exec_()
