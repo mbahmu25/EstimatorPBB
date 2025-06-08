@@ -157,6 +157,15 @@ class GeoPandasSpatialJoin(QgsProcessingAlgorithm):
         bg = bg.to_crs(pbt.crs)
         admin = admin.to_crs(pbt.crs)
 
+        # Clip manual dengan overlay
+        admin_mask = admin[['geometry']]  # cukup geometri saja
+
+        # Clip PBT, ZNT, dan BG dengan overlay
+        pbt = gpd.overlay(pbt, admin_mask, how='intersection')
+        znt = gpd.overlay(znt, admin_mask, how='intersection')
+        bg = gpd.overlay(bg, admin_mask, how='intersection')
+
+
         pbt = pbt.reset_index(drop=True)
         pbt['id_bidang_internal'] = pbt.index
 
@@ -189,6 +198,8 @@ class GeoPandasSpatialJoin(QgsProcessingAlgorithm):
 
         # # Drop spatial index columns
         pbt_final = pbt_final.drop(columns=[col for col in pbt_final.columns if col.startswith('index_')], errors='ignore')
+        mean_value = pbt_final[field_name].mean(skipna=True)
+        pbt_final[field_name] = pbt_final[field_name].fillna(mean_value)
 
         # Perhitungan PBB
         if field_building_level:
